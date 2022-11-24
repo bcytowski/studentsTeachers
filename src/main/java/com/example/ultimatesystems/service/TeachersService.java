@@ -46,6 +46,10 @@ public class TeachersService {
         return teacher;
     }
 
+    public List<Teacher> getAll(){
+        return teachersRepository.findAll();
+    }
+
     public List<Teacher> getAllTeachersSorted() {
         List<Teacher> teachers = new ArrayList<>();
         teachersRepository.findAll().forEach(teachers::add);
@@ -56,17 +60,20 @@ public class TeachersService {
     }
 
     public void deleteTeacher(Long id){
-        teachersRepository.deleteById(id);
+        if(teachersRepository.findById(id).isPresent()){
+            teachersRepository.deleteById(id);
+        } else throw new IllegalArgumentException("couldn't find specific teacher");
     }
 
     public void updateTeacher(Long teacherId, TeacherDto dto){
-        if(isValidateProperly(dto)) {
-            Teacher teacher = teachersRepository.findById(teacherId)
-                    .map(b -> teacherDtoToEntity(dto, b))
-                    .orElseThrow(() -> new IllegalArgumentException(" "));
-
-            teachersRepository.save(teacher);
-        }
+        if(teachersRepository.findById(teacherId).isPresent()) {
+            if (isValidateProperly(dto)) {
+                Teacher teacher = teachersRepository.findById(teacherId)
+                        .map(b -> teacherDtoToEntity(dto, b))
+                        .orElseThrow(() -> new IllegalArgumentException(" "));
+                teachersRepository.save(teacher);
+            }
+        } else throw new IllegalArgumentException("couldn't find specific teacher");
     }
 
     private Teacher teacherDtoToEntity(TeacherDto dto, Teacher teacher){

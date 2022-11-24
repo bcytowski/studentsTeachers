@@ -28,7 +28,7 @@ public class Teacher {
     private String subject;
 
     @JsonIgnoreProperties("teachers")
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.REFRESH })
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL })
     @JoinTable(
             name = "Students_Teachers",
             joinColumns = @JoinColumn(name = "teacher_id", referencedColumnName = "id"),

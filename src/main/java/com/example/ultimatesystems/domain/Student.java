@@ -30,4 +30,17 @@ public class Student {
     @ManyToMany(mappedBy = "students")
     @JsonIgnoreProperties("students")
     private List<Teacher> teachers = new ArrayList<>();
+
+    public void addTeacher(Teacher teacher) {
+        this.teachers.add(teacher);
+        teacher.getStudents().add(this);
+    }
+
+    public void removeTeacher(long teacherId) {
+        Teacher teacher = this.teachers.stream().filter(t -> t.getId() == teacherId).findFirst().orElse(null);
+        if (teacher != null) {
+            this.teachers.remove(teacher);
+            teacher.getStudents().remove(this);
+        }
+    }
 }

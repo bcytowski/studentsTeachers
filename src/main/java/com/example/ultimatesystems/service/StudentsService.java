@@ -40,8 +40,6 @@ public class StudentsService {
             List<Teacher> allById = teachersRepository.findAllById(teacherIds);
             allById.forEach(teacher -> teacher.addStudent(student));
             allById.forEach(teachersRepository::save);
-
-
         }
         return student;
     }
@@ -49,19 +47,6 @@ public class StudentsService {
     public void deleteStudent(Long id) {
         studentsRepository.deleteById(id);
     }
-
-//    public void addTeacherToStudent(Long studentId, TeacherDto teacherDto) {
-//
-//        Student student = getStudentById(studentId);
-//        student.getTeachers().add(Teacher.builder()
-//                .name(teacherDto.getName())
-//                .surname(teacherDto.getSurname())
-//                .age(teacherDto.getAge())
-//                .email(teacherDto.getEmail())
-//                .students(teacherDto.getStudents())
-//                .build());
-//        studentsRepository.save(student);
-//    }
 
 
     public Student getStudentById(Long id) {
@@ -93,6 +78,11 @@ public class StudentsService {
                     .orElseThrow(() -> new IllegalArgumentException(" "));
 
             studentsRepository.save(student);
+
+            List<Long> teacherIds = dto.getTeachers();
+            List<Teacher> allById = teachersRepository.findAllById(teacherIds);
+            allById.forEach(teacher -> teacher.addStudent(student));
+            allById.forEach(teachersRepository::save);
         }
     }
 

@@ -21,8 +21,14 @@ public class TeacherController {
 
     @GetMapping(path = "/getAllSorted")
     @ResponseStatus(HttpStatus.OK)
-    public List<Teacher> getAllTeachers(){
+    public List<Teacher> getAllTeachersSorted(){
         return teachersService.getAllTeachersSorted();
+    }
+
+    @GetMapping(path = "/")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Teacher> getAll(){
+        return teachersService.getAll();
     }
 
     @PostMapping(path = "/add")
