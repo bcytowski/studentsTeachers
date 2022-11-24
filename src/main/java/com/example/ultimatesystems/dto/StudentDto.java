@@ -4,7 +4,9 @@ import com.example.ultimatesystems.domain.Teacher;
 import lombok.*;
 
 import javax.persistence.ManyToMany;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -19,5 +21,5 @@ public class StudentDto {
     private int age;
     private String email;
     private String fieldOfStudy;
-    private Set<Teacher> teachers = new HashSet<>();
+    private List<Long> teachers = new ArrayList<>();
 }

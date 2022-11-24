@@ -3,14 +3,16 @@ package com.example.ultimatesystems.service;
 import com.example.ultimatesystems.domain.Student;
 import com.example.ultimatesystems.domain.Teacher;
 import com.example.ultimatesystems.dto.StudentDto;
-import com.example.ultimatesystems.dto.TeacherDto;
 import com.example.ultimatesystems.repository.StudentsRepository;
+import com.example.ultimatesystems.repository.TeachersRepository;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -19,51 +21,48 @@ import java.util.stream.Collectors;
 public class StudentsService {
 
     private final StudentsRepository studentsRepository;
+    private final TeachersRepository teachersRepository;
 
-    public StudentsService(StudentsRepository studentsRepository) {
+    public StudentsService(StudentsRepository studentsRepository, final TeachersRepository teachersRepository, final TeachersService teachersService) {
         this.studentsRepository = studentsRepository;
+        this.teachersRepository = teachersRepository;
     }
 
     public Student createStudent(StudentDto studentDto) {
         Student student = new Student();
+
         if (isValidateProperly(studentDto)) {
-            student = Student.builder()
-                    .name(studentDto.getName())
-                    .surname(studentDto.getSurname())
-                    .age(studentDto.getAge())
-                    .email(studentDto.getEmail())
-                    .fieldOfStudy(studentDto.getFieldOfStudy())
-                    .teachers(studentDto.getTeachers())
-                    .build();
-            studentsRepository.save(student);
+            Student createdStudent = studentDtoToEntity(studentDto, student);
+
+            studentsRepository.save(createdStudent);
+
+            List<Long> teacherIds = studentDto.getTeachers();
+            List<Teacher> allById = teachersRepository.findAllById(teacherIds);
+            allById.forEach(teacher -> teacher.addStudent(student));
+            allById.forEach(teachersRepository::save);
+
+
         }
         return student;
     }
 
-    public void addTeacherToStudent(Long studentId, TeacherDto teacherDto) {
-        Student student = getStudentById(studentId);
-        student.getTeachers().add(Teacher.builder()
-                .name(teacherDto.getName())
-                .surname(teacherDto.getSurname())
-                .age(teacherDto.getAge())
-                .email(teacherDto.getEmail())
-                .students(teacherDto.getStudents())
-                .build());
-        studentsRepository.save(student);
+    public void deleteStudent(Long id) {
+        studentsRepository.deleteById(id);
     }
 
-    public void updateUser(StudentDto studentDto, Long id) {
-        Student student = getStudentById(id);
-        if (isValidateProperly(studentDto))
-            studentsRepository.save(Student.builder()
-                    .name(studentDto.getName())
-                    .surname(studentDto.getSurname())
-                    .age(studentDto.getAge())
-                    .email(studentDto.getEmail())
-                    .fieldOfStudy(studentDto.getFieldOfStudy())
-                    .teachers(studentDto.getTeachers())
-                    .build());
-    }
+//    public void addTeacherToStudent(Long studentId, TeacherDto teacherDto) {
+//
+//        Student student = getStudentById(studentId);
+//        student.getTeachers().add(Teacher.builder()
+//                .name(teacherDto.getName())
+//                .surname(teacherDto.getSurname())
+//                .age(teacherDto.getAge())
+//                .email(teacherDto.getEmail())
+//                .students(teacherDto.getStudents())
+//                .build());
+//        studentsRepository.save(student);
+//    }
+
 
     public Student getStudentById(Long id) {
         Student student = studentsRepository.findById(id)
@@ -87,6 +86,28 @@ public class StudentsService {
         return students;
     }
 
+    public void updateStudent(final Long id, final StudentDto dto) {
+        if (isValidateProperly(dto)) {
+            Student student = studentsRepository.findById(id)
+                    .map(b -> studentDtoToEntity(dto, b))
+                    .orElseThrow(() -> new IllegalArgumentException(" "));
+
+            studentsRepository.save(student);
+        }
+    }
+
+    private Student studentDtoToEntity(StudentDto dto, Student student) {
+
+        student.setSurname(dto.getSurname());
+        student.setAge(dto.getAge());
+        student.setEmail(dto.getEmail());
+        student.setName(dto.getName());
+        student.setFieldOfStudy(dto.getFieldOfStudy());
+        student.setTeachers(teachersRepository.findByIdIn(dto.getTeachers()));
+
+        return student;
+    }
+
     public List<Student> findStudentsByName(String name) {
         return studentsRepository.findAll().stream()
                 .filter(student -> student.getName().equals(name))
@@ -97,11 +118,6 @@ public class StudentsService {
         return studentsRepository.findAll().stream()
                 .filter(student -> student.getSurname().equals(surname))
                 .collect(Collectors.toList());
-    }
-
-
-    public void deleteStudent(Long id) {
-        studentsRepository.delete(getStudentById(id));
     }
 
 

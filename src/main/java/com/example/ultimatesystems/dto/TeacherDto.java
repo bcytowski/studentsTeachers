@@ -6,7 +6,9 @@ import lombok.*;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -21,5 +23,5 @@ public class TeacherDto {
     private int age;
     private String email;
     private String subject;
-    private Set<Student> students = new HashSet<>();
+    private List<Long> students = new ArrayList<>();
 }

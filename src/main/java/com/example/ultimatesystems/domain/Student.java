@@ -1,9 +1,13 @@
 package com.example.ultimatesystems.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity(name = "students")
@@ -11,7 +15,6 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 @Builder
 public class Student {
     @Id
@@ -23,6 +26,8 @@ public class Student {
     private int age;
     private String email;
     private String fieldOfStudy;
+
     @ManyToMany(mappedBy = "students")
-    private Set<Teacher> teachers = new HashSet<>();
+    @JsonIgnoreProperties("students")
+    private List<Teacher> teachers = new ArrayList<>();
 }
